@@ -1,5 +1,6 @@
 package models;
 import annotation.Model;
+import framework.ModelView;
 
 public class Personne {
     private String nom;
@@ -47,10 +48,15 @@ public class Personne {
         this.setage(age);
         this.setmesure(mesure);
     }
+    public Personne()
+    {
+
+    }
 
     @Model(url="Personne/nomcomplet")
-    public String get_nomcomplet()
+    public ModelView get_nomcomplet()
     {
-        return this.getnom()+" "+this.getprenom();
+        ModelView m=new ModelView("View.jsp");
+        return m;
     }
 }
