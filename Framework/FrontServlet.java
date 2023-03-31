@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.DirectoryIteratorException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import models.*;
 import annotation.Model;
 
 public class FrontServlet extends HttpServlet{
@@ -34,11 +33,11 @@ public class FrontServlet extends HttpServlet{
                 out.print("<th style='border: 1px solid black;border-collapse:collapse;'>ClassName</th>");
                 out.print("<th style='border: 1px solid black;border-collapse:collapse;'>Method</th>");
                 out.print("</tr>");
-                for(String key : mappingUrls.keySet())
+                for(String key : MappingUrls.keySet())
                 {
                     out.print("<tr>");
                     out.print("<td style='border: 1px solid black;border-collapse:collapse;'>"+key+"</td>");
-                    Mapping m =(Mapping)mappingUrls.get(key);
+                    Mapping m =(Mapping)MappingUrls.get(key);
                     out.print("<td style='border: 1px solid black;border-collapse:collapse;'>"+m.getClassName()+"</td>");
                     out.print("<td style='border: 1px solid black;border-collapse:collapse;'>"+m.getMethod()+"</td>");
                     out.print("</tr>");
