@@ -16,33 +16,37 @@ import java.nio.file.DirectoryIteratorException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import annotation.Model;
+import framework.*;
+import java.util.Set;
+import jakarta.servlet.RequestDispatcher;
 
-public class FrontServlet extends HttpServlet{
+public class FrontServlet<T> extends HttpServlet{
     HashMap<String,Mapping> MappingUrls;
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-           String url = response.encodeRedirectURL(request.getRequestURL().toString());
-           String[] requete=url.split("FrontServlet/");
-           if(requete.length>1){
-                out.print("<table style='border: 1px solid black;border-collapse:collapse;'>");
-                out.print("<tr>");
-                out.print("<th style='border: 1px solid black;border-collapse:collapse;'>Key</th>");
-                out.print("<th style='border: 1px solid black;border-collapse:collapse;'>ClassName</th>");
-                out.print("<th style='border: 1px solid black;border-collapse:collapse;'>Method</th>");
-                out.print("</tr>");
-                for(String key : MappingUrls.keySet())
-                {
-                    out.print("<tr>");
-                    out.print("<td style='border: 1px solid black;border-collapse:collapse;'>"+key+"</td>");
-                    Mapping m =(Mapping)MappingUrls.get(key);
-                    out.print("<td style='border: 1px solid black;border-collapse:collapse;'>"+m.getClassName()+"</td>");
-                    out.print("<td style='border: 1px solid black;border-collapse:collapse;'>"+m.getMethod()+"</td>");
-                    out.print("</tr>");
+            String url = response.encodeRedirectURL(request.getRequestURL().toString());
+            String[] requete=url.split("FrontServlet/");
+            String pack=this.getInitParameter("Package");
+            if(requete.length>1){
+                Set<String> keySet = MappingUrls.keySet();
+                for (String key : keySet) {
+                    if(requete[1].equals(key))
+                    {
+                        Mapping m =(Mapping)MappingUrls.get(key);
+                        String classe=m.getClassName();
+                        String methode=m.getMethod();
+                        String className = pack+"."+classe; 
+                        T objet=instantiate(className);
+                        Method fonction=objet.getClass().getMethod(methode);
+                        ModelView mv=(ModelView)fonction.invoke(objet, (Object[]) null);
+                        RequestDispatcher rd = request.getRequestDispatcher("/"+mv.getview());
+                        rd.forward(request, response);
+                        return;
+                    }
                 }
-                out.print("</table>");
            }
            else{
                out.print("Aucune commande valide");
@@ -95,5 +99,11 @@ public class FrontServlet extends HttpServlet{
 
     }
 }
+public static <T> T instantiate(String className) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    Class<T> clazz = (Class<T>) Class.forName(className);
+    Constructor<T> constructor = clazz.getConstructor(); 
+    T instance = constructor.newInstance();
+    return instance;
+} 
 
 }
