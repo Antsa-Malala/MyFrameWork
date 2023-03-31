@@ -9,6 +9,11 @@
       <servlet-name>MyController</servlet-name>
       <servlet-class>etu1963.framework.servlet.FrontServlet</servlet-class>
       <async-supported>true</async-supported>
+      <init-param>
+        <param-name>Package</param-name>
+        <param-value>models</param-value>
+        <description>Nom du package de toutes les modeles</description>
+        </init-param>
     </servlet>
     <servlet-mapping>
       <servlet-name>MyController</servlet-name>

@@ -26,9 +26,24 @@ public class FrontServlet extends HttpServlet{
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
            String url = response.encodeRedirectURL(request.getRequestURL().toString());
-           String[] requete=url.split("Control/");
+           String[] requete=url.split("FrontServlet/");
            if(requete.length>1){
-               out.print("Votre requete : "+requete[1]);
+                out.print("<table style='border: 1px solid black;border-collapse:collapse;'>");
+                out.print("<tr>");
+                out.print("<th style='border: 1px solid black;border-collapse:collapse;'>Key</th>");
+                out.print("<th style='border: 1px solid black;border-collapse:collapse;'>ClassName</th>");
+                out.print("<th style='border: 1px solid black;border-collapse:collapse;'>Method</th>");
+                out.print("</tr>");
+                for(String key : mappingUrls.keySet())
+                {
+                    out.print("<tr>");
+                    out.print("<td style='border: 1px solid black;border-collapse:collapse;'>"+key+"</td>");
+                    Mapping m =(Mapping)mappingUrls.get(key);
+                    out.print("<td style='border: 1px solid black;border-collapse:collapse;'>"+m.getClassName()+"</td>");
+                    out.print("<td style='border: 1px solid black;border-collapse:collapse;'>"+m.getMethod()+"</td>");
+                    out.print("</tr>");
+                }
+                out.print("</table>");
            }
            else{
                out.print("Aucune commande valide");
@@ -51,10 +66,11 @@ public class FrontServlet extends HttpServlet{
     MappingUrls=new HashMap<String,Mapping>();
     ArrayList<Class> classeAnnote=new ArrayList<Class>();
     String classesPath = getServletContext().getRealPath("/WEB-INF/classes");
-    Path directory = Paths.get(classesPath+"/models");
+    String pack=this.getInitParameter("Package");
+    Path directory = Paths.get(classesPath+"/"+pack);
     try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, "*.class")) {
         for (Path file: stream) {
-            classeAnnote.add(Class.forName("models." + file.getFileName().toString().substring(0, file.getFileName().toString().length() - 6)));
+            classeAnnote.add(Class.forName(pack+"." + file.getFileName().toString().substring(0, file.getFileName().toString().length() - 6)));
         }
         for(int l=0;l<classeAnnote.size();l++)
         {
