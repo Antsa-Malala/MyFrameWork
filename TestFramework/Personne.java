@@ -1,6 +1,7 @@
 package models;
 import annotation.Model;
 import framework.ModelView;
+import java.util.ArrayList;
 
 public class Personne {
     private String nom;
@@ -56,7 +57,18 @@ public class Personne {
     @Model(url="Personne/nomcomplet")
     public ModelView get_nomcomplet()
     {
-        ModelView m=new ModelView("View.jsp");
+        ModelView m=new ModelView();
+        m.setview("View.jsp");
+        ArrayList<Personne> olona=new ArrayList<Personne>();
+        Personne jean=new Personne("Rakoto","Jean",16,1.60);
+        Personne robert=new Personne("Randria","Robert",18,1.66);
+        Personne jeanne=new Personne("Andria","Jeanne",20,1.76);
+        Personne marie=new Personne("Rasoa","Marie",30,1.80);
+        olona.add(jean);
+        olona.add(robert);
+        olona.add(jeanne);
+        olona.add(marie);
+        m.addItem("Liste_personne",olona);
         return m;
     }
 }
