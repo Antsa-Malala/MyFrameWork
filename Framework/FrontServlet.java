@@ -42,6 +42,12 @@ public class FrontServlet<T> extends HttpServlet{
                         T objet=instantiate(className);
                         Method fonction=objet.getClass().getMethod(methode);
                         ModelView mv=(ModelView)fonction.invoke(objet, (Object[]) null);
+                        HashMap data=mv.getdata();  
+                        Set<String> keydata = data.keySet();
+                        for (String keyobject : keydata) {
+                            T object=(T)data.get(keyobject);
+                            request.setAttribute(keyobject,object);
+                        }
                         RequestDispatcher rd = request.getRequestDispatcher("/"+mv.getview());
                         rd.forward(request, response);
                         return;

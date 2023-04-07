@@ -1,7 +1,10 @@
 package framework;
+import java.util.HashMap;
 
 public class ModelView {
     private String view;
+    private HashMap<String,Object> data;
+
     public String getview()
     {
         return this.view;
@@ -10,9 +13,24 @@ public class ModelView {
     {
         this.view=view;
     }
-
-    public ModelView(String view)
+    public void setdata(HashMap<String,Object> data)
     {
-        this.setview(view);
+        this.data=data;
+    }
+
+    public HashMap<String,Object> getdata()
+    {
+        return this.data;
+    }
+
+    public void addItem(String cle,Object value)
+    {
+        this.data.put(cle,value);
+    }
+
+
+    public ModelView()
+    {
+        this.setdata(new HashMap<String,Object>());
     }
 }
