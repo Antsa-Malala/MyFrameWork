@@ -71,4 +71,23 @@ public class Personne {
         m.addItem("Liste_personne",olona);
         return m;
     }
+
+    @Model(url="load_form")
+    public ModelView load_form()
+    {
+        ModelView mv=new ModelView();
+        mv.setview("Form.jsp");
+        return mv;
+    }
+    @Model(url="formulaire")
+    public ModelView getcoordonnees()
+    {
+        ModelView mv=new ModelView();
+        mv.setview("Valider.jsp");
+        ArrayList<Personne> olona=new ArrayList<Personne>();
+        Personne user=new Personne(this.getnom(),this.getprenom(),this.getage(),this.getmesure());
+        olona.add(user);
+        mv.addItem("Liste_personne",olona);
+        return mv;
+    }
 }
