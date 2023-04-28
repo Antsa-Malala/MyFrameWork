@@ -77,9 +77,10 @@ public class FrontServlet<T> extends HttpServlet{
                         for(int j=0;j<field.length;j++)
                         {
                             attributs[j] = field[j].getName();
-                        }
-
+                        }  
                         // Parcourir tous les paramètres et les valeurs du formulaire
+                        Parameter[] param=fonction.getParameters();
+                        ArrayList<Object> parameter=new ArrayList<>();
                         Enumeration<String> paramNames = request.getParameterNames();
                         while (paramNames.hasMoreElements()) {
                             String paramName = paramNames.nextElement();
@@ -96,13 +97,23 @@ public class FrontServlet<T> extends HttpServlet{
                                 }
                                 
                             }
+                            for(int l=0;l<param.length;l++)
+                            {
+                                if(param[l].getName().equals(paramName))
+                                {
+                                    String[] paramValues = request.getParameterValues(paramName);
+                                    Object paramValue = convertParamValue(paramValues[0], param[l].getType());
+                                    parameter.add(paramValue);
+                                }
+                            }
                         }
+                        Object[] paramfonction=parameter.toArray();
 
                         //invoque la fonction et recupere la valeur de retour ModelView
-                        ModelView mv = (ModelView) fonction.invoke(objet, (Object[]) null);
+                        ModelView mv = (ModelView) fonction.invoke(objet, paramfonction);
 
 
-                        //Parcours les données envoyées et le met en attibuts de la requete
+                        //Parcours les données envoyées et le met en attributs de la requete
                         HashMap data=mv.getdata();  
                         Set<String> keydata = data.keySet();
                         for (String keyobject : keydata) {

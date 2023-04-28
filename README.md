@@ -1,8 +1,10 @@
 # MyFrameWork
-* Chaque fonction définie dans une classe doit être annotée
-    avec @Model(url="url_pour_acceder_a_ma_fonction")
+* Chaque fonction définie dans une classe doit 
+    - être annotée avec @Model(url="url_pour_acceder_a_ma_fonction")
+    - retourner un objet de type ModelView
 
 * Pour renvoyer des données, instancer la classe ModelView exemple:
+    ModelView exemple=new ModelView()
     - vue: exemple.setview("Votre vue.jsp")
     - donnee : exemple.addItem("Nom_attribut",valeur_a_ajouter)
 
@@ -23,5 +25,6 @@
         <servlet-name>MyController</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
+
+* Vos vues devront être placées dans un dossier nommer Views à la racine de l'application
     
-* Si il y a des insertion à travers des formulaires le rang des champs dans le formulaire devrait être le même que le rang des arguments de la fonction qui va les traiter
