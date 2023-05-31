@@ -8,7 +8,7 @@
 </head>
 <body>
      <form method="POST" action="upload" enctype="multipart/form-data">
-        Fichier : <input type="file" name="sary" id="sary">
+        Fichier : <input type="file" name="sary">
         <input type="submit" value="Importer">
     </form>
 </body>

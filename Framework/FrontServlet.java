@@ -25,7 +25,9 @@ import java.util.Set;
 import jakarta.servlet.RequestDispatcher;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import jakarta.servlet.annotation.MultipartConfig;
 
+@MultipartConfig
 public class FrontServlet<T> extends HttpServlet{
     HashMap<String,Mapping> MappingUrls;
     
@@ -86,18 +88,26 @@ public class FrontServlet<T> extends HttpServlet{
                         Parameter[] param=fonction.getParameters();
                         ArrayList<Object> parameter=new ArrayList<>();
                         Enumeration<String> paramNames = request.getParameterNames();
+                        try{
+                            Collection<Part> files = request.getParts();
+                            for(int i=0;i<field.length;i++){
+                                Field f=field[i];
+                                if(f.getType() == framework.FileUpload.class){
+                                    Method method= objet.getClass().getMethod("set"+attributs[i], field[i].getType());
+                                    FileUpload o = this.upload(files, attributs[i]);
+                                    method.invoke(objet , o);
+                                }
+                            }
+                        }catch(Exception e){
+                            e.printStackTrace();
+                        }
                         while (paramNames.hasMoreElements()) {
                             String paramName = paramNames.nextElement();
                             //Verifier si le parametre fait partie des attributs de la classe 
                             for(int j=0;j<attributs.length;j++)
                             {
                                 Method method= objet.getClass().getMethod("set"+attributs[j], field[j].getType());
-                                Collection<Part> files = request.getParts();
-                                if (files != null && files.size() > 0) {
-                                    FileUpload fp = this.upload(files, attributs[j]);
-                                    method.invoke(objet , fp);
-                                }
-                                else if(attributs[j].equals(paramName))
+                                if(attributs[j].equals(paramName))
                                 {
                                     String[] paramValues = request.getParameterValues(paramName);
                                     Object para=convertParam(paramValues.length, field[j].getType(),paramValues);
@@ -245,22 +255,12 @@ private Object convertParam(int taille,Class<?> paramType,String[] val) {
     }
     return null; 
 }
-private String getName(Part part) {
-    String contentDisposition = part.getHeader("content-disposition");
-    String[] elements = contentDisposition.split(";");
-    for (String element : elements) {
-        if (element.trim().startsWith("filename")) {
-            return element.substring(element.indexOf('=') + 1).trim().replace("\"", "");
-        }
-    }
-    return null;
-}
-private FileUpload upload( Collection<Part> files, String nomattribut)throws Exception{
-    FileUpload file = new FileUpload();
-    String filename = null;
+private FileUpload upload( Collection<Part> files, String namefield) throws Exception{
+    String path=null;
     Part filepart = null;
     for( Part part : files ){
-        if( part.getName().equals(nomattribut) ){
+        if( part.getName().equals(namefield) ){
+            path = Paths.get(part.getSubmittedFileName()).toString();
             filepart = part;
             break;
         }
@@ -272,13 +272,13 @@ private FileUpload upload( Collection<Part> files, String nomattribut)throws Exc
         while( ( read = io.read( buffer , 0 , buffer.length )) != -1 ){
             buffers.write( buffer , 0, read );
         }
-        file.setname(this.getFileName(filepart));
-        file.setsary(buffers.toByteArray());
+        FileUpload file = new FileUpload(path,this.getFileName(filepart),buffers.toByteArray());
         return file;
     }catch (Exception e) {
-        throw e;
+       throw e;
     }
 }
+
 private String getFileName(Part part) {
     String contentDisposition = part.getHeader("content-disposition");
     String[] parts = contentDisposition.split(";");

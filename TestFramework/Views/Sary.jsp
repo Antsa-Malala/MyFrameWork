@@ -14,8 +14,9 @@
 <body>
     <%for(int i=0;i<listes.size();i++) { %>
         <h1>Vous avez importe : </h1>
-        <p><%out.print(listes.get(i).getsary().getname());%></p>
-        <p><%out.print(listes.get(i).getsary().getsary().length);%>kb</p>
+        <p>Nom : <%out.print(listes.get(i).getsary().getname());%></p>
+        <p>Path : <%out.print(listes.get(i).getsary().getpath());%></p>
+        <p>Taille : <%out.print(listes.get(i).getsary().getsary().length);%></p>
     <% } %>
 </body>
 </html>
