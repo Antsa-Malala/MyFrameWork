@@ -1,6 +1,7 @@
 package models;
 import annotation.Model;
 import framework.ModelView;
+import framework.FileUpload;
 import java.util.ArrayList;
 
 public class Personne {
@@ -9,6 +10,8 @@ public class Personne {
     private String prenom;
     private int age;
     private double mesure;
+    private String[] option;
+    private FileUpload sary;
 
     public int getid()
     {
@@ -30,6 +33,14 @@ public class Personne {
     {
         return this.mesure;
     }
+    public String[] getoption()
+    {
+        return this.option;
+    }
+    public FileUpload getsary()
+    {
+        return this.sary;
+    }
     public void setid(int id)
     {
         this.id=id;
@@ -49,6 +60,18 @@ public class Personne {
     public void setmesure(double mesure)
     {
         this.mesure=mesure;
+    }
+    public void setoption(String[] option)
+    {
+        this.option=new String[option.length];
+        for(int i=0;i<option.length;i++)
+        {
+            this.option[i]=option[i];
+        }
+    }
+    public void setsary(FileUpload sary)
+    {
+        this.sary=sary;
     }
 
     public Personne(int id,String nom,String prenom,int age,double mesure)
@@ -117,6 +140,45 @@ public class Personne {
         Personne marie=new Personne(4,"Rasoa","Marie",30,1.80);
         pers[3]=marie;
         olona.add(pers[id-1]);
+        mv.addItem("Liste_personne",olona);
+        return mv;
+    }
+    @Model(url="load_choice")
+    public ModelView load_choice()
+    {
+        ModelView mv=new ModelView();
+        mv.setview("Choix.jsp");
+        return mv;
+    }
+    @Model(url="choice")
+    public ModelView getchoix()
+    {
+        ModelView mv=new ModelView();
+        mv.setview("TonChoix.jsp");
+        ArrayList<Personne> olona=new ArrayList<Personne>();
+        Personne user=new Personne();
+        user.setoption(this.getoption());
+        olona.add(user);
+        mv.addItem("Liste_personne",olona);
+        return mv;
+    }
+    @Model(url="load_upload")
+    public ModelView load_upload()
+    {
+        ModelView mv=new ModelView();
+        mv.setview("Upload.jsp");
+        return mv;
+    }
+    @Model(url="upload")
+    public ModelView getupload()
+    {
+        ModelView mv=new ModelView();
+        mv.setview("Sary.jsp");
+        ArrayList<Personne> olona=new ArrayList<Personne>();
+        Personne user=new Personne();
+        System.out.print(this.getsary().getname());
+        user.setsary(this.getsary());
+        olona.add(user);
         mv.addItem("Liste_personne",olona);
         return mv;
     }

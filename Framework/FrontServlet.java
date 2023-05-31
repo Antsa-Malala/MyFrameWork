@@ -9,6 +9,7 @@ import etu1963.framework.Mapping;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,8 +20,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import annotation.Model;
 import framework.*;
+import jakarta.servlet.http.Part;
 import java.util.Set;
 import jakarta.servlet.RequestDispatcher;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 public class FrontServlet<T> extends HttpServlet{
     HashMap<String,Mapping> MappingUrls;
@@ -84,18 +88,28 @@ public class FrontServlet<T> extends HttpServlet{
                         Enumeration<String> paramNames = request.getParameterNames();
                         while (paramNames.hasMoreElements()) {
                             String paramName = paramNames.nextElement();
-
                             //Verifier si le parametre fait partie des attributs de la classe 
                             for(int j=0;j<attributs.length;j++)
                             {
-                                if(attributs[j].equals(paramName))
+                                Method method= objet.getClass().getMethod("set"+attributs[j], field[j].getType());
+                                Collection<Part> files = request.getParts();
+                                if (files != null && files.size() > 0) {
+                                    FileUpload fp = this.upload(files, attributs[j]);
+                                    method.invoke(objet , fp);
+                                }
+                                else if(attributs[j].equals(paramName))
                                 {
                                     String[] paramValues = request.getParameterValues(paramName);
-                                    Method method= objet.getClass().getMethod("set"+attributs[j], field[j].getType());
-                                    Object paramValue = convertParamValue(paramValues[0], field[j].getType());
-                                    method.invoke(objet,paramValue);
-                                }
-                                
+                                    Object para=convertParam(paramValues.length, field[j].getType(),paramValues);
+                                    if(field[j].getType().isArray())
+                                    {
+                                        method.invoke(objet,para);
+                                    }
+                                    else{
+                                        Object paramValue = convertParamValue(paramValues[0], field[j].getType());
+                                        method.invoke(objet,paramValue);
+                                    }
+                                }  
                             }
                             for(int l=0;l<param.length;l++)
                             {
@@ -108,9 +122,8 @@ public class FrontServlet<T> extends HttpServlet{
                             }
                         }
                         Object[] paramfonction=parameter.toArray();
-
                         //invoque la fonction et recupere la valeur de retour ModelView
-                        ModelView mv = (ModelView) fonction.invoke(objet, paramfonction);
+                        ModelView mv= (ModelView) fonction.invoke(objet, paramfonction);
 
 
                         //Parcours les données envoyées et le met en attributs de la requete
@@ -134,7 +147,9 @@ public class FrontServlet<T> extends HttpServlet{
         }
         catch(Exception e)
         {
-           e.printStackTrace();
+            Throwable cause = e.getCause();
+            cause.printStackTrace();
+            e.printStackTrace();
         }
     }
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -198,6 +213,80 @@ private Object convertParamValue(String paramValue, Class<?> paramType) {
     }
     return null; 
 }
-
+private Object convertParam(int taille,Class<?> paramType,String[] val) {
+    if (paramType == String[].class) {
+        String[] n=new String[taille];
+        for(int i=0;i<taille;i++)
+        {
+            n[i]=(String)convertParamValue(val[i],paramType.getComponentType());
+        }
+        return (Object)n;
+    } else if (paramType == int[].class || paramType == Integer[].class) {
+        int[] n=new int[taille];
+        for(int i=0;i<taille;i++)
+        {
+            n[i]=(int)convertParamValue(val[i],paramType.getComponentType());
+        }
+        return (Object)n;
+    } else if (paramType == boolean[].class || paramType == Boolean[].class) {
+        boolean[] n=new boolean[taille];
+        for(int i=0;i<taille;i++)
+        {
+            n[i]=(boolean)convertParamValue(val[i],paramType.getComponentType());
+        }
+        return (Object)n;
+    }else if (paramType == double[].class || paramType == Double[].class) {
+        double[] n=new double[taille];
+        for(int i=0;i<taille;i++)
+        {
+            n[i]=(double)convertParamValue(val[i],paramType.getComponentType());
+        }
+        return (Object)n;
+    }
+    return null; 
+}
+private String getName(Part part) {
+    String contentDisposition = part.getHeader("content-disposition");
+    String[] elements = contentDisposition.split(";");
+    for (String element : elements) {
+        if (element.trim().startsWith("filename")) {
+            return element.substring(element.indexOf('=') + 1).trim().replace("\"", "");
+        }
+    }
+    return null;
+}
+private FileUpload upload( Collection<Part> files, String nomattribut)throws Exception{
+    FileUpload file = new FileUpload();
+    String filename = null;
+    Part filepart = null;
+    for( Part part : files ){
+        if( part.getName().equals(nomattribut) ){
+            filepart = part;
+            break;
+        }
+    }
+    try(InputStream io = filepart.getInputStream()){
+        ByteArrayOutputStream buffers = new ByteArrayOutputStream();
+        byte[] buffer = new byte[(int)filepart.getSize()];
+        int read;
+        while( ( read = io.read( buffer , 0 , buffer.length )) != -1 ){
+            buffers.write( buffer , 0, read );
+        }
+        file.setname(this.getFileName(filepart));
+        file.setsary(buffers.toByteArray());
+        return file;
+    }catch (Exception e) {
+        throw e;
+    }
+}
+private String getFileName(Part part) {
+    String contentDisposition = part.getHeader("content-disposition");
+    String[] parts = contentDisposition.split(";");
+    for (String partStr : parts) {
+        if (partStr.trim().startsWith("filename"))
+            return partStr.substring(partStr.indexOf('=') + 1).trim().replace("\"", "");
+    }
+    return null;
+}
 
 }
