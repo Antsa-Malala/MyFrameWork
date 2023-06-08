@@ -19,6 +19,7 @@ import java.nio.file.DirectoryIteratorException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import annotation.Model;
+import annotation.Scope;
 import framework.*;
 import jakarta.servlet.http.Part;
 import java.util.Set;
@@ -30,7 +31,8 @@ import jakarta.servlet.annotation.MultipartConfig;
 @MultipartConfig
 public class FrontServlet<T> extends HttpServlet{
     HashMap<String,Mapping> MappingUrls;
-    
+    HashMap<String,Object> instance=new HashMap<String,Object>();
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -63,7 +65,6 @@ public class FrontServlet<T> extends HttpServlet{
 
                         //instance l'objet
                         T objet=instantiate(className);
-
                         //recupere la fonction
                         Method[] methods = objet.getClass().getDeclaredMethods();
                         Method fonction = null;
@@ -77,7 +78,7 @@ public class FrontServlet<T> extends HttpServlet{
                         
                         //recupere les attributs de la classe
                         Field[] field = objet.getClass().getDeclaredFields();
-
+                       
                         //les transformer en tableau de string pour la comparaison
                         String[] attributs = new String[field.length];
                         for(int j=0;j<field.length;j++)
@@ -88,14 +89,17 @@ public class FrontServlet<T> extends HttpServlet{
                         Parameter[] param=fonction.getParameters();
                         ArrayList<Object> parameter=new ArrayList<>();
                         Enumeration<String> paramNames = request.getParameterNames();
+                        reset_attribut(objet);
                         try{
-                            Collection<Part> files = request.getParts();
-                            for(int i=0;i<field.length;i++){
-                                Field f=field[i];
-                                if(f.getType() == framework.FileUpload.class){
-                                    Method method= objet.getClass().getMethod("set"+attributs[i], field[i].getType());
-                                    FileUpload o = this.upload(files, attributs[i]);
-                                    method.invoke(objet , o);
+                            if (request.getContentType()!=null && request.getContentType().startsWith("multipart/form-data")) {
+                                Collection<Part> files = request.getParts();
+                                for(int i=0;i<field.length;i++){
+                                    Field f=field[i];
+                                    if(f.getType() == framework.FileUpload.class){
+                                        Method method= objet.getClass().getMethod("set"+attributs[i], field[i].getType());
+                                        FileUpload o = this.upload(files, attributs[i]);
+                                        method.invoke(objet , o);
+                                    }
                                 }
                             }
                         }catch(Exception e){
@@ -182,6 +186,7 @@ public class FrontServlet<T> extends HttpServlet{
         }
         for(int l=0;l<classeAnnote.size();l++)
         {
+            setinstance(classeAnnote.get(l).getName());
             Method[] met=classeAnnote.get(l).getDeclaredMethods();
             for(int j=0;j<met.length;j++)
             {
@@ -204,11 +209,65 @@ public class FrontServlet<T> extends HttpServlet{
 
     }
 }
-public static <T> T instantiate(String className) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+public void setinstance(String classname) throws Exception {
+    Class<T> clazz = (Class<T>) Class.forName(classname);
+    Scope scopeAnnotation = clazz.getAnnotation(Scope.class);
+    if(scopeAnnotation!=null)
+    {
+        T instance_object = instantiate(classname);
+        instance.put(classname,null);
+    }
+} 
+
+public void reset_attribut(Object objet) throws Exception
+{
+    Field[] fields = objet.getClass().getDeclaredFields();
+
+    for (Field field : fields) {
+        field.setAccessible(true);
+        Object defaultValue = defaut(field.getType());
+        field.set(objet, defaultValue);
+    }
+}
+private static Object defaut(Class<?> type) {
+    if (type == boolean.class || type ==Boolean.class) {
+        return false;
+    } else if (type == byte.class || type== Byte.class) {
+        return (byte) 0;
+    } else if (type == int.class|| type==Integer.class) {
+        return 0;
+    } else if (type == float.class|| type==Float.class || type == double.class || type== Double.class) {
+        return 0.0;
+    } else if (type == String.class) {
+        return "";
+    } else {
+        return null;
+    }
+}
+public T instantiate(String className) throws Exception{
+    Set<String> keySet = instance.keySet();
+
+    for (String key : keySet) {
+        if(className.equals(key))
+        {
+            T m=(T)instance.get(className);
+            if(m!=null)
+            {
+                return m;
+            }
+            else{
+                    Class<T> clazz = (Class<T>) Class.forName(className);
+                    Constructor<T> constructor = clazz.getConstructor(); 
+                    T instance_object = constructor.newInstance();
+                    instance.replace(className,instance_object);
+                    return (T)instance.get(className);
+            }
+        }
+    }
     Class<T> clazz = (Class<T>) Class.forName(className);
     Constructor<T> constructor = clazz.getConstructor(); 
-    T instance = constructor.newInstance();
-    return instance;
+    T instance_object = constructor.newInstance();
+    return instance_object;
 } 
 
 private Object convertParamValue(String paramValue, Class<?> paramType) {
@@ -288,5 +347,4 @@ private String getFileName(Part part) {
     }
     return null;
 }
-
 }
