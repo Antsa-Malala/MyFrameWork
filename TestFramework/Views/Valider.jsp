@@ -14,6 +14,8 @@
 <body>
     <%for(int i=0;i<listes.size();i++) { %>
         <h1>Bienvenue <%out.print(listes.get(i).getprenom()+" "+listes.get(i).getnom()+". Vous avez "+listes.get(i).getage()+"an(s) et vous mesurez "+listes.get(i).getmesure()+" metres");%> </h1>
+        Valeur du nombre test <%out.print(listes.get(i).gettest());%> ici est egal à 1 car les attributs de la classe sont reinitialises à chaque appel de fonction.
+        Veuillez mettre en commentaire la ligne "reset_attribut(objet);" dans la classe FrontServlet pour faire la verification
     <% } %>
 </body>
 </html>

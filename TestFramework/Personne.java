@@ -1,9 +1,11 @@
 package models;
 import annotation.Model;
+import annotation.Scope;
 import framework.ModelView;
 import framework.FileUpload;
 import java.util.ArrayList;
 
+@Scope
 public class Personne {
     private int id;
     private String nom;
@@ -12,6 +14,7 @@ public class Personne {
     private double mesure;
     private String[] option;
     private FileUpload sary;
+    private int test=0;
 
     public int getid()
     {
@@ -40,6 +43,10 @@ public class Personne {
     public FileUpload getsary()
     {
         return this.sary;
+    }
+    public int gettest()
+    {
+        return this.test;
     }
     public void setid(int id)
     {
@@ -72,6 +79,10 @@ public class Personne {
     public void setsary(FileUpload sary)
     {
         this.sary=sary;
+    }
+    public void settest(int test)
+    {
+        this.test=test;
     }
 
     public Personne(int id,String nom,String prenom,int age,double mesure)
@@ -115,10 +126,12 @@ public class Personne {
     @Model(url="formulaire")
     public ModelView getcoordonnees()
     {
+        this.settest(this.gettest()+1);
         ModelView mv=new ModelView();
         mv.setview("Valider.jsp");
         ArrayList<Personne> olona=new ArrayList<Personne>();
         Personne user=new Personne(this.getid(),this.getnom(),this.getprenom(),this.getage(),this.getmesure());
+        user.settest(this.gettest());
         olona.add(user);
         mv.addItem("Liste_personne",olona);
         return mv;
