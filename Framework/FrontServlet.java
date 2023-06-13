@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import etu1963.framework.Mapping;
@@ -19,6 +20,7 @@ import java.nio.file.DirectoryIteratorException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import annotation.Model;
+import annotation.Auth;
 import annotation.Scope;
 import framework.*;
 import jakarta.servlet.http.Part;
@@ -35,8 +37,9 @@ public class FrontServlet<T> extends HttpServlet{
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+            response.setContentType("text/html;charset=UTF-8");
+            PrintWriter out = response.getWriter();
+            try{
             //recupere l'url
             String url = response.encodeRedirectURL(request.getRequestURL().toString());
 
@@ -45,7 +48,6 @@ public class FrontServlet<T> extends HttpServlet{
 
             //recupere la valeur du package de l'utilisateur dans web.xml
             String pack=this.getInitParameter("Package");
-
             if(requete.length>1){
                 //recupere les toutes les clés dans MappingUrls
                 Set<String> keySet = MappingUrls.keySet();
@@ -90,20 +92,16 @@ public class FrontServlet<T> extends HttpServlet{
                         ArrayList<Object> parameter=new ArrayList<>();
                         Enumeration<String> paramNames = request.getParameterNames();
                         reset_attribut(objet);
-                        try{
-                            if (request.getContentType()!=null && request.getContentType().startsWith("multipart/form-data")) {
-                                Collection<Part> files = request.getParts();
-                                for(int i=0;i<field.length;i++){
-                                    Field f=field[i];
-                                    if(f.getType() == framework.FileUpload.class){
-                                        Method method= objet.getClass().getMethod("set"+attributs[i], field[i].getType());
-                                        FileUpload o = this.upload(files, attributs[i]);
-                                        method.invoke(objet , o);
-                                    }
+                        if (request.getContentType()!=null && request.getContentType().startsWith("multipart/form-data")) {
+                            Collection<Part> files = request.getParts();
+                            for(int i=0;i<field.length;i++){
+                                Field f=field[i];
+                                if(f.getType() == framework.FileUpload.class){
+                                    Method method= objet.getClass().getMethod("set"+attributs[i], field[i].getType());
+                                    FileUpload o = this.upload(files, attributs[i]);
+                                    method.invoke(objet , o);
                                 }
                             }
-                        }catch(Exception e){
-                            e.printStackTrace();
                         }
                         while (paramNames.hasMoreElements()) {
                             String paramName = paramNames.nextElement();
@@ -136,10 +134,62 @@ public class FrontServlet<T> extends HttpServlet{
                             }
                         }
                         Object[] paramfonction=parameter.toArray();
-                        //invoque la fonction et recupere la valeur de retour ModelView
-                        ModelView mv= (ModelView) fonction.invoke(objet, paramfonction);
+                        Annotation[] ano=fonction.getAnnotations();
+                        ModelView mv=null;
+                        int executed=0;
+                        for(int k=0;k<ano.length;k++)
+                        {
+                            if(ano[k].annotationType()==Auth.class)
+                            {
+                                String session=this.getInitParameter("SessionName");
+                                Object c=request.getSession().getAttribute(session);
+                                if(c!=null)
+                                {
+                                    Auth mo=(Auth)ano[k];
+                                    if(!mo.profil().equals("")){
+                                        String profil=this.getInitParameter("SessionProfil");
+                                        String p=(String)request.getSession().getAttribute(profil);
+                                        if(mo.profil().equals(p))
+                                        {
+                                            mv= (ModelView) fonction.invoke(objet, paramfonction);
+                                            executed=1;
+                                        }
+                                        else{
+                                            throw new Exception("L'execution de cette fonction necessite la connexion en tant que "+mo.profil());
+                                        }
+                                    }
+                                    else{
+                                        mv= (ModelView) fonction.invoke(objet, paramfonction);
+                                        executed=1;
+                                    }
+                                }
+                                else{
+                                    throw new Exception("L'execution de cette fonction a besoin d'authentification");
+                                }
+                            }
+                        }
+                        if(executed==0)
+                        {
+                            mv= (ModelView) fonction.invoke(objet, paramfonction);
+                        }
 
-
+                        if(!mv.getsession().isEmpty())
+                        {
+                            String session=this.getInitParameter("SessionName");
+                            String profil=this.getInitParameter("SessionProfil");
+                            Object c=mv.getsession().get(session);
+                            Object p=mv.getsession().get(profil);
+                            HttpSession sess = request.getSession();
+                            if(c!=null)
+                            {
+                                sess.setAttribute(session, c);
+                            }
+                            if(p!=null)
+                            {
+                                sess.setAttribute(profil, p);
+                            }
+                        }
+                        
                         //Parcours les données envoyées et le met en attributs de la requete
                         HashMap data=mv.getdata();  
                         Set<String> keydata = data.keySet();
@@ -161,9 +211,7 @@ public class FrontServlet<T> extends HttpServlet{
         }
         catch(Exception e)
         {
-            Throwable cause = e.getCause();
-            cause.printStackTrace();
-            e.printStackTrace();
+            out.println(e.getMessage());
         }
     }
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -206,7 +254,6 @@ public class FrontServlet<T> extends HttpServlet{
     catch(Exception e)
     {
        e.printStackTrace();
-
     }
 }
 public void setinstance(String classname) throws Exception {

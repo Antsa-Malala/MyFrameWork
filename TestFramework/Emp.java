@@ -1,5 +1,6 @@
 package models;
 import annotation.Model;
+import annotation.Auth;
 import framework.ModelView;
 import framework.FileUpload;
 import java.util.ArrayList;
@@ -49,6 +50,8 @@ public class Emp {
         mv.setview("FormEmp.jsp");
         return mv;
     }
+
+    @Auth
     @Model(url="Emp/formulaire")
     public ModelView getcoordonnees()
     {
@@ -62,4 +65,27 @@ public class Emp {
         mv.addItem("Liste_emp",olona);
         return mv;
     }
+
+    @Model(url="try_delete")
+    public ModelView delete()
+    {
+        ModelView mv=new ModelView();
+        mv.setview("DeleteEmp.jsp");
+        return mv;
+    }
+    
+    @Auth(profil="admin")
+    @Model(url="Emp/delete")
+    public ModelView deleteEmp()
+    {
+        ModelView mv=new ModelView();
+        mv.setview("Deleted.jsp");
+        ArrayList<Emp> olona=new ArrayList<Emp>();
+        Emp user=new Emp(this.getnom(),this.getprenom());
+        user.settest(this.gettest());
+        olona.add(user);
+        mv.addItem("Liste_emp",olona);
+        return mv;
+    }
+
 }
