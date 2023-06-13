@@ -27,7 +27,17 @@
         <param-name>Package</param-name>
         <param-value>models</param-value>
         <description>Nom du package de toutes les modeles</description>
-        </init-param>
+      </init-param>
+      <init-param>
+        <param-name>SessionName</param-name>
+        <param-value>isConnected</param-value>
+        <description>Nom de la variable de session</description>
+      </init-param>
+      <init-param>
+        <param-name>SessionProfil</param-name>
+        <param-value>profil</param-value>
+        <description>Nom de la variable de session indiquant le profil</description>
+      </init-param>
     </servlet>
     <servlet-mapping>
       <servlet-name>MyController</servlet-name>
