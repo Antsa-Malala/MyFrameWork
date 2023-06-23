@@ -1,15 +1,18 @@
 package models;
 import annotation.Model;
 import annotation.Auth;
+import annotation.Sess;
 import framework.ModelView;
 import framework.FileUpload;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 //La classe non annotee Scope
 public class Emp {
     private String nom;
     private String prenom;
     private int test=0;
+    HashMap<String,Object> session;
 
     public String getnom()
     {
@@ -26,6 +29,14 @@ public class Emp {
     public void setprenom(String prenom)
     {
         this.prenom=prenom;
+    }
+    public void setsession(HashMap<String,Object> session)
+    {
+        this.session=session;
+    }
+    public HashMap<String,Object> getsession()
+    {
+        return this.session;
     }
     public int gettest()
     {
@@ -83,6 +94,20 @@ public class Emp {
         ArrayList<Emp> olona=new ArrayList<Emp>();
         Emp user=new Emp(this.getnom(),this.getprenom());
         user.settest(this.gettest());
+        olona.add(user);
+        mv.addItem("Liste_emp",olona);
+        return mv;
+    }
+    @Sess
+    @Model(url="Emp/session")
+    public ModelView sessions()
+    {
+        ModelView mv=new ModelView();
+        mv.setview("Session.jsp");
+        ArrayList<Emp> olona=new ArrayList<Emp>();
+        Emp user=new Emp(this.getnom(),this.getprenom());
+        user.settest(this.gettest());
+        user.setsession(this.getsession());
         olona.add(user);
         mv.addItem("Liste_emp",olona);
         return mv;
