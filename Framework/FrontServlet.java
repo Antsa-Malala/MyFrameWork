@@ -22,6 +22,7 @@ import java.lang.reflect.*;
 import annotation.Model;
 import annotation.Auth;
 import annotation.Scope;
+import annotation.Sess;
 import framework.*;
 import jakarta.servlet.http.Part;
 import java.util.Set;
@@ -166,6 +167,20 @@ public class FrontServlet<T> extends HttpServlet{
                                 else{
                                     throw new Exception("L'execution de cette fonction a besoin d'authentification");
                                 }
+                            }
+                            System.out.println(ano[k].annotationType().toString());
+                            if(ano[k].annotationType()==Sess.class)
+                            {
+                                HttpSession session=request.getSession();
+                                Enumeration<String> attributes = session.getAttributeNames();
+                                HashMap<String,Object> sess=new HashMap<String,Object>();
+                                while (attributes.hasMoreElements()) {
+                                    String cle = attributes.nextElement();
+                                    Object valeur = session.getAttribute(cle);
+                                    sess.put(cle,valeur);
+                                }
+                                Method setsession=objet.getClass().getMethod("setsession", HashMap.class);
+                                setsession.invoke(objet, sess);
                             }
                         }
                         if(executed==0)
