@@ -162,11 +162,7 @@ public class FrontServlet<T> extends HttpServlet{
                                                 {
                                                     response.setContentType("application/json");
                                                     response.setCharacterEncoding("UTF-8");
-                                                    Gson gson = new GsonBuilder().create();
-                                                    String jsonString = gson.toJson(fonction.invoke(objet, paramfonction));
-                                                    response.setContentType("application/json");
-                                                    out.print(jsonString);
-                                                    out.flush();
+                                                    this.sendJson(out,  fonction.invoke(objet, paramfonction));
                                                     return;
                                                 }
                                             }
@@ -184,11 +180,7 @@ public class FrontServlet<T> extends HttpServlet{
                                             {
                                                 response.setContentType("application/json");
                                                 response.setCharacterEncoding("UTF-8");
-                                                Gson gson = new GsonBuilder().create();
-                                                String jsonString = gson.toJson(fonction.invoke(objet, paramfonction));
-                                                response.setContentType("application/json");
-                                                out.print(jsonString);
-                                                out.flush();
+                                                this.sendJson(out,  fonction.invoke(objet, paramfonction));
                                                 return;
                                             }
                                         }
@@ -222,11 +214,7 @@ public class FrontServlet<T> extends HttpServlet{
                                 {
                                     response.setContentType("application/json");
                                     response.setCharacterEncoding("UTF-8");
-                                    Gson gson = new GsonBuilder().create();
-                                    String jsonString = gson.toJson(fonction.invoke(objet, paramfonction));
-                                    response.setContentType("application/json");
-                                    out.print(jsonString);
-                                    out.flush();
+                                    this.sendJson(out,  fonction.invoke(objet, paramfonction));
                                     return;
                                 }
                             }
@@ -261,11 +249,7 @@ public class FrontServlet<T> extends HttpServlet{
                         {
                             response.setContentType("application/json");
                             response.setCharacterEncoding("UTF-8");
-                            Gson gson = new GsonBuilder().create();
-                            String jsonString = gson.toJson(data);
-                            response.setContentType("application/json");
-                            out.print(jsonString);
-                            out.flush();
+                            this.sendJson(out, data);
                         }
                         else{
                             //Renvoie vers la vue de la valeure de retour de la fonction
@@ -293,6 +277,13 @@ public class FrontServlet<T> extends HttpServlet{
    protected void doPost(HttpServletRequest request, HttpServletResponse response)
            throws ServletException, IOException {
        processRequest(request, response);
+   }
+   public void sendJson(PrintWriter out,Object data)
+   {
+        Gson gson = new GsonBuilder().create();
+        String jsonString = gson.toJson(data);
+        out.print(jsonString);
+        out.flush();
    }
    public void init() throws ServletException {
     MappingUrls=new HashMap<String,Mapping>();
