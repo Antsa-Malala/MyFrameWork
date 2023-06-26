@@ -23,6 +23,7 @@ import annotation.Model;
 import annotation.Auth;
 import annotation.Scope;
 import annotation.Sess;
+import annotation.RestAPI;
 import framework.*;
 import jakarta.servlet.http.Part;
 import java.util.Set;
@@ -155,6 +156,20 @@ public class FrontServlet<T> extends HttpServlet{
                                         String p=(String)request.getSession().getAttribute(profil);
                                         if(mo.profil().equals(p))
                                         {
+                                            for(int i=0;i<ano.length;i++)
+                                            {
+                                                if(ano[i].annotationType()==RestAPI.class)
+                                                {
+                                                    response.setContentType("application/json");
+                                                    response.setCharacterEncoding("UTF-8");
+                                                    Gson gson = new GsonBuilder().create();
+                                                    String jsonString = gson.toJson(fonction.invoke(objet, paramfonction));
+                                                    response.setContentType("application/json");
+                                                    out.print(jsonString);
+                                                    out.flush();
+                                                    return;
+                                                }
+                                            }
                                             mv= (ModelView) fonction.invoke(objet, paramfonction);
                                             executed=1;
                                         }
@@ -163,6 +178,20 @@ public class FrontServlet<T> extends HttpServlet{
                                         }
                                     }
                                     else{
+                                        for(int i=0;i<ano.length;i++)
+                                        {
+                                            if(ano[i].annotationType()==RestAPI.class)
+                                            {
+                                                response.setContentType("application/json");
+                                                response.setCharacterEncoding("UTF-8");
+                                                Gson gson = new GsonBuilder().create();
+                                                String jsonString = gson.toJson(fonction.invoke(objet, paramfonction));
+                                                response.setContentType("application/json");
+                                                out.print(jsonString);
+                                                out.flush();
+                                                return;
+                                            }
+                                        }
                                         mv= (ModelView) fonction.invoke(objet, paramfonction);
                                         executed=1;
                                     }
@@ -171,7 +200,6 @@ public class FrontServlet<T> extends HttpServlet{
                                     throw new Exception("L'execution de cette fonction a besoin d'authentification");
                                 }
                             }
-                            System.out.println(ano[k].annotationType().toString());
                             if(ano[k].annotationType()==Sess.class)
                             {
                                 HttpSession session=request.getSession();
@@ -188,6 +216,20 @@ public class FrontServlet<T> extends HttpServlet{
                         }
                         if(executed==0)
                         {
+                            for(int i=0;i<ano.length;i++)
+                            {
+                                if(ano[i].annotationType()==RestAPI.class)
+                                {
+                                    response.setContentType("application/json");
+                                    response.setCharacterEncoding("UTF-8");
+                                    Gson gson = new GsonBuilder().create();
+                                    String jsonString = gson.toJson(fonction.invoke(objet, paramfonction));
+                                    response.setContentType("application/json");
+                                    out.print(jsonString);
+                                    out.flush();
+                                    return;
+                                }
+                            }
                             mv= (ModelView) fonction.invoke(objet, paramfonction);
                         }
 
