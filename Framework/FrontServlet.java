@@ -30,6 +30,9 @@ import jakarta.servlet.RequestDispatcher;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import jakarta.servlet.annotation.MultipartConfig;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 
 @MultipartConfig
 public class FrontServlet<T> extends HttpServlet{
@@ -212,11 +215,23 @@ public class FrontServlet<T> extends HttpServlet{
                             T object=(T)data.get(keyobject);
                             request.setAttribute(keyobject,object);
                         }
+                        if(mv.getisJson())
+                        {
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            Gson gson = new GsonBuilder().create();
+                            String jsonString = gson.toJson(data);
+                            response.setContentType("application/json");
+                            out.print(jsonString);
+                            out.flush();
+                        }
+                        else{
+                            //Renvoie vers la vue de la valeure de retour de la fonction
+                            RequestDispatcher rd = request.getRequestDispatcher("/Views/"+mv.getview());
+                            rd.forward(request, response);
+                            return;
+                        }
                         
-                        //Renvoie vers la vue de la valeure de retour de la fonction
-                        RequestDispatcher rd = request.getRequestDispatcher("/Views/"+mv.getview());
-                        rd.forward(request, response);
-                        return;
                     }
                 }
            }

@@ -103,6 +103,7 @@ public class Emp {
     public ModelView sessions()
     {
         ModelView mv=new ModelView();
+        mv.setisJson(true);
         mv.setview("Session.jsp");
         ArrayList<Emp> olona=new ArrayList<Emp>();
         Emp user=new Emp(this.getnom(),this.getprenom());
