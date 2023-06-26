@@ -2,6 +2,7 @@ package models;
 import annotation.Model;
 import annotation.Auth;
 import annotation.Sess;
+import annotation.RestAPI;
 import framework.ModelView;
 import framework.FileUpload;
 import java.util.ArrayList;
@@ -114,4 +115,13 @@ public class Emp {
         return mv;
     }
 
+    @RestAPI
+    @Model(url="Emp/session2")
+    public Emp[] findAll()
+    {
+        Emp[] emp=new Emp[2];
+        emp[0]=new Emp("Rakoto","Jean");
+        emp[1]=new Emp("Randria","Luc");
+        return emp;
+    }
 }
