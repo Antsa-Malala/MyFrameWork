@@ -1,4 +1,5 @@
 package framework;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ModelView {
@@ -6,6 +7,8 @@ public class ModelView {
     private HashMap<String,Object> data;
     private HashMap<String,Object> session;
     private boolean isJson;
+    private boolean invalidateSession;
+    private ArrayList<String> removeSession;
 
     public String getview()
     {
@@ -51,11 +54,33 @@ public class ModelView {
     {
         this.isJson=isJson;
     }
+    public boolean getinvalidateSession()
+    {
+        return this.invalidateSession;
+    }
+    public void setinvalidateSession(boolean invalidateSession)
+    {
+        this.invalidateSession=invalidateSession;
+    }
+    public ArrayList<String> getremoveSession()
+    {
+        return this.removeSession;
+    }
+    public void setremoveSession(ArrayList<String> session)
+    {
+        this.removeSession=session;
+    }
+    public void addRemoveSession(String sessionName)
+    {
+        this.removeSession.add(sessionName);
+    }
 
     public ModelView()
     {
         this.setdata(new HashMap<String,Object>());
         this.setsession(new HashMap<String,Object>());
         this.setisJson(false);
+        this.setinvalidateSession(false);
+        this.setremoveSession(new ArrayList<String>());
     }
 }
