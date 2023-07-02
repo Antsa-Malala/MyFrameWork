@@ -220,7 +220,20 @@ public class FrontServlet<T> extends HttpServlet{
                             }
                             mv= (ModelView) fonction.invoke(objet, paramfonction);
                         }
-
+                        ArrayList<String> sessionRemove=mv.getremoveSession();
+                        HttpSession mysess = request.getSession(false);
+                        if (mysess != null) {
+                            System.out.println(mv.getinvalidateSession());
+                            if(mv.getinvalidateSession())
+                            {
+                                mysess.invalidate();
+                            }
+                            for(int i=0;i<sessionRemove.size();i++)
+                            {
+                                System.out.println("bukjavhyuui");
+                                mysess.removeAttribute(sessionRemove.get(i)); 
+                            }
+                        }
                         if(!mv.getsession().isEmpty())
                         {
                             String session=this.getInitParameter("SessionName");

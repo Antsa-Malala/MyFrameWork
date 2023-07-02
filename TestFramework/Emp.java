@@ -124,4 +124,55 @@ public class Emp {
         emp[1]=new Emp("Randria","Luc");
         return emp;
     }
+
+
+    @Model(url="Logout")
+    public ModelView deconnection() 
+    {
+        ModelView mv=new ModelView();
+        mv.setinvalidateSession(true);
+        mv.setview("Login.jsp");
+        return mv;
+    }
+    @Model(url="removeSession")
+    public ModelView removeSession() 
+    {
+        ModelView mv=new ModelView();
+        mv.addRemoveSession("profil");
+        mv.setview("Login.jsp");
+        return mv;
+    }
+
+    @Sess
+    @Model(url="Emp/Logout")
+    public ModelView deconnexion()
+    {
+        ModelView mv=new ModelView();
+        mv.setisJson(true);
+        mv.setinvalidateSession(true);
+        mv.setview("Session.jsp");
+        ArrayList<Emp> olona=new ArrayList<Emp>();
+        Emp user=new Emp(this.getnom(),this.getprenom());
+        user.settest(this.gettest());
+        user.setsession(this.getsession());
+        olona.add(user);
+        mv.addItem("Liste_emp",olona);
+        return mv;
+    }
+    @Sess
+    @Model(url="Emp/removeSession")
+    public ModelView mamafaSession()
+    {
+        ModelView mv=new ModelView();
+        mv.setisJson(true);
+        mv.addRemoveSession("isConnected");
+        mv.setview("Session.jsp");
+        ArrayList<Emp> olona=new ArrayList<Emp>();
+        Emp user=new Emp(this.getnom(),this.getprenom());
+        user.settest(this.gettest());
+        user.setsession(this.getsession());
+        olona.add(user);
+        mv.addItem("Liste_emp",olona);
+        return mv;
+    }
 }
