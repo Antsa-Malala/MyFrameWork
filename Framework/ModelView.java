@@ -7,6 +7,8 @@ public class ModelView {
     private HashMap<String,Object> data;
     private HashMap<String,Object> session;
     private boolean isJson;
+    private boolean isXml;
+    private String dataxml;
     private boolean invalidateSession;
     private ArrayList<String> removeSession;
 
@@ -14,9 +16,17 @@ public class ModelView {
     {
         return this.view;
     }
+    public String getdataxml()
+    {
+        return this.dataxml;
+    }
     public void setview(String view)
     {
         this.view=view;
+    }
+    public void setdataxml(String dataxml)
+    {
+        this.dataxml=dataxml;
     }
     public void setdata(HashMap<String,Object> data)
     {
@@ -50,9 +60,17 @@ public class ModelView {
     {
         return this.isJson;
     }
+    public boolean getisXml()
+    {
+        return this.isXml;
+    }
     public void setisJson(boolean isJson)
     {
         this.isJson=isJson;
+    }
+    public void setisXml(boolean isXml)
+    {
+        this.isXml=isXml;
     }
     public boolean getinvalidateSession()
     {
@@ -80,6 +98,7 @@ public class ModelView {
         this.setdata(new HashMap<String,Object>());
         this.setsession(new HashMap<String,Object>());
         this.setisJson(false);
+        this.setisXml(false);
         this.setinvalidateSession(false);
         this.setremoveSession(new ArrayList<String>());
     }

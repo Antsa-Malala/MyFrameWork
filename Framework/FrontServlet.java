@@ -8,12 +8,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import etu1963.framework.Mapping;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Date;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.DirectoryIteratorException;
@@ -27,6 +29,8 @@ import annotation.RestAPI;
 import framework.*;
 import jakarta.servlet.http.Part;
 import java.util.Set;
+import java.util.Map.Entry;
+
 import jakarta.servlet.RequestDispatcher;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -263,6 +267,13 @@ public class FrontServlet<T> extends HttpServlet{
                             response.setContentType("application/json");
                             response.setCharacterEncoding("UTF-8");
                             this.sendJson(out, data);
+                            return;
+                        }
+                        if(mv.getisXml())
+                        {
+                            response.setContentType("text/xml");
+                            this.sendXml(out,mv.getdataxml());
+                            return;
                         }
                         else{
                             //Renvoie vers la vue de la valeure de retour de la fonction
@@ -293,11 +304,16 @@ public class FrontServlet<T> extends HttpServlet{
    }
    public void sendJson(PrintWriter out,Object data)
    {
-        Gson gson = new GsonBuilder().create();
-        String jsonString = gson.toJson(data);
-        out.print(jsonString);
+            Gson gson = new GsonBuilder().create();
+            String jsonString = gson.toJson(data);
+            out.print(jsonString);
         out.flush();
    }
+
+   public void sendXml(PrintWriter out,String dataxml) throws Exception{   
+        out.print(dataxml);
+        out.flush();
+    }
    public void init() throws ServletException {
     MappingUrls=new HashMap<String,Mapping>();
     ArrayList<Class> classeAnnote=new ArrayList<Class>();
@@ -394,6 +410,7 @@ public T instantiate(String className) throws Exception{
 } 
 
 private Object convertParamValue(String paramValue, Class<?> paramType) {
+    System.out.println(paramType.toString());
     if (paramType == String.class) {
         return paramValue;
     } else if (paramType == int.class || paramType == Integer.class) {
@@ -402,6 +419,8 @@ private Object convertParamValue(String paramValue, Class<?> paramType) {
         return Boolean.parseBoolean(paramValue);
     }else if (paramType == double.class || paramType == Double.class) {
         return Double.parseDouble(paramValue);
+    }else if (paramType == Date.class && !paramValue.equals("")) {
+        return Date.valueOf(paramValue);
     }
     return null; 
 }
